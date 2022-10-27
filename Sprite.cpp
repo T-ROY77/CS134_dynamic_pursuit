@@ -1,5 +1,6 @@
 #include "Sprite.h"
 
+// Troy Perez - CS134 SJSU
 //
 // Troy Perez - CS134 SJSU
 
@@ -51,9 +52,9 @@ void Sprite::setImage(ofImage img) {
 
 glm::vec3 Sprite::heading() {
 	glm::vec3 o = glm::vec3(0, -1, 0);
-	o = glm::rotate(o, glm::radians(rot), glm::vec3(0, 0, 1));
-	glm::normalize(o);
-	return o;
+	glm::mat4 mrot = glm::rotate(glm::mat4(1), glm::radians(rot), glm::vec3(0, 0, 1));
+	glm::vec3 h = mrot * glm::vec4(o, 1);
+	return glm::normalize(h);
 }
 
 void Sprite::moveSprite(glm::vec3 p) {
@@ -84,6 +85,40 @@ void Sprite::moveSprite(glm::vec3 p) {
 }
 
 void Sprite::integrate() {
+
+
+	glm::vec3 velocity;
+	glm::vec3 acceleration;  //acceleration = 0?
+	glm::vec3 force;
+	float angularforce;
+	float angularvelocity;
+	float angularAccelration;
+	bool thrust; //use for sound or particle effects
+	//damping slowly takes away velocity
+	// 
+	// 
+	//rotation around z axis
+	//integrate over angle
+	// when pressing key, set angular force to right or left
+	// 
+	// for agents, set angular force to p.pos - trans
+	// set acceleration to some initial value
+	// OR set forces to attract to the player
+	//
+	//rotation += (angularVelocity * dt)
+	//float a = angular acceleration
+	//a += angular force * 1/mass;
+	//angular velocity += a * dt;
+	//angularvelocity *= damping
+
+
+	//force variable stores thruster force (just a vector)
+	//pressing a key will set force to thruster
+	//pos += (velocity * dt)
+	//acceleration += (force * 1/mass)
+	//velocity += accel * dt
+	//velocity *= damping;
+
 
 
 	// interval for this step
@@ -176,6 +211,8 @@ int SpriteSystem::removeNear(ofVec3f point, float dist) {
 	while (s != sprites.end()) {
 		ofVec3f v = s->trans - point;
 		if (v.length() < dist) {
+			spritePos.push_back(s->trans);
+
 			tmp = sprites.erase(s);
 			count++;
 			s = tmp;

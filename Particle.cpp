@@ -1,5 +1,6 @@
 #include "Particle.h"
 
+// Troy Perez - CS134 SJSU
 
 Particle::Particle() {
 
@@ -14,7 +15,7 @@ Particle::Particle() {
 	radius = 5;
 	damping = .99;
 	mass = 1;
-	color = ofColor::aquamarine;
+	color = ofColor::red;
 }
 
 void Particle::draw() {

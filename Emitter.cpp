@@ -4,7 +4,7 @@
 #include "ofMain.h"
 #include "Emitter.h"
 
-
+// Troy Perez - CS134 SJSU
 
 //  Create a new Emitter - needs a SpriteSystem
 //

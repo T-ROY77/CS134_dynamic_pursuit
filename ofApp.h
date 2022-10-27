@@ -6,6 +6,7 @@
 #include "Particle.h"
 #include "ParticleEmitter.h"
 
+// Troy Perez - CS134 SJSU
 
 class Emitter;
 
@@ -125,11 +126,10 @@ public:
 	bool easy = false;
 	bool hard = false;
 
-	//int gameTime;
 	float gameTime;
-
 	float startTime;
-
+	float smokeTime;
+	float smokeDelay = 5;
 	float length = 175;
 	glm::vec3 mouseLast;
 
@@ -155,6 +155,12 @@ public:
 	Emitter* invaders;
 
 	ParticleEmitter* gun;
+	ParticleEmitter* explosions;
+	ParticleEmitter* smoke;
+
+	ImpulseRadialForce* radialForce;
+	ImpulseRadialForce* smokeRadialForce;
+
 
 	vector<Particle> particles;
 

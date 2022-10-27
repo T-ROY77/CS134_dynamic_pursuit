@@ -4,7 +4,8 @@
 // Basic Sprite Class
 //
 //
-//  Kevin M. Smith - CS 134 SJSU
+//  // Troy Perez - CS134 SJSU
+
 
 #include "ofMain.h"
 
@@ -58,5 +59,5 @@ public:
 	int removeNear(ofVec3f point, float dist);
 	void draw();
 	vector<Sprite> sprites;
-
+	vector<glm::vec3> spritePos;
 };

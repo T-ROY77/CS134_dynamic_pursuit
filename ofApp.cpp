@@ -3,13 +3,8 @@
 
 #include "ofxGui.h"
 
-//
-// agents slow down when near player
-// how to rotate
-// 
-// choppy movement
-//
-//
+// Troy Perez - CS134 SJSU
+
 void TriangleShape::draw() {
 	ofFill();
 	ofPushMatrix();
@@ -36,7 +31,6 @@ void ofApp::shootGun() {
 	
 	//gun->setVelocity(p.heading());
 	//gun->start();
-
 	
 	Particle particle;
 
@@ -44,8 +38,10 @@ void ofApp::shootGun() {
 	particle.velocity = p.heading();
 	particle.acceleration = p.heading() * 2;
 	particle.radius = 3;
+	particle.lifespan = .05;
 
 	particles.push_back(particle);
+
 }
 
 void ofApp::setupParameters() {
@@ -64,6 +60,8 @@ void ofApp::setupParameters() {
 	startTime = ofGetElapsedTimeMillis();
 
 	gameTime = 0;
+
+	smokeTime = -smokeDelay;
 
 	if (easy) {
 		penergy = 15;
@@ -138,10 +136,41 @@ void ofApp::setup() {
 
 	gun = new ParticleEmitter(new ParticleSystem);
 	gun->setRate(1);
-	gun->setLifespan(1000);
+	gun->setLifespan(.5);
 	gun->setParticleRadius(2);
+	//gun->start();
 
 	particles.clear();
+
+	explosions = new ParticleEmitter(new ParticleSystem);
+	explosions->groupSize = 100;
+	explosions->lifespan = .1;
+
+	explosions->setVelocity(glm::vec3(0, 0, 0));
+	explosions->oneShot = true;
+	explosions->setEmitterType(RadialEmitter);
+	explosions->setParticleRadius(2);
+	explosions->radius = 0;
+	explosions->setRate(1);
+	explosions->pos = glm::vec3(200, 200, 0);
+	explosions->color = ofColor::darkRed;
+	radialForce = new ImpulseRadialForce(10.0);
+
+	explosions->sys->addForce(radialForce);
+
+	smoke = new ParticleEmitter(new ParticleSystem);
+	smoke->setEmitterType(RadialEmitter);
+	smoke->setParticleRadius(1);
+	smoke->groupSize = 1000;
+	smoke->setLifespan(1);
+	smoke->oneShot = true;
+	smoke->setVelocity(glm::vec3(0, 0, 0));
+	smoke->setRate(1);
+	smoke->color = ofColor::dimGrey;
+	smokeRadialForce = new ImpulseRadialForce(2);
+
+	smoke->sys->addForce(smokeRadialForce);
+
 
 	setupParameters();
 }
@@ -155,8 +184,14 @@ void ofApp::update() {
 	invaders->childHeight = agentSize;
 	invaders->childWidth = agentSize;
 
+	explosions->update();
+
+	smoke->pos = p.pos;
+
+	smoke->update();
 	//gun->update();
 	for (int i = 0; i < particles.size(); i++) {
+
 		particles[i].integrate();
 	}
 
@@ -248,7 +283,16 @@ void ofApp::checkCollisions() {
 	if (penergy > 0) {
 		int collisions = invaders->sys->removeNear(p.pos, collisionDist);
 		penergy = penergy - collisions;
+		if (collisions > 0) {
+			//explosions->pos = particles[0].position;
+			for (int i = 0; i < invaders->sys->spritePos.size(); i++) {
+				explosions->pos = invaders->sys->spritePos[i];
+			}
+			explosions->start();
+		}
 	}
+	invaders->sys->spritePos.clear();
+
 }
 
 
@@ -316,6 +360,10 @@ void ofApp::draw() {
 		ofDrawBitmapString(timeText, ofPoint(ofGetWindowWidth() / 2 - 50, (ofGetWindowHeight() / 2) + 50));
 	}
 	if (start) {
+
+		explosions->draw();
+		smoke->draw();
+
 		ofSetColor(ofColor::white);
 		background.draw(0, 0);
 
@@ -350,6 +398,14 @@ void ofApp::draw() {
 		timeText += "Elasped time: " + gameTimeText + " seconds";
 		ofSetColor(ofColor::white);
 		ofDrawBitmapString(timeText, ofPoint(ofGetWindowWidth() - 210, 40));
+
+
+		if (gameTime - smokeTime > smokeDelay) {
+			string smokeBombText;
+			smokeBombText = "Smoke Bomb Ready";
+			ofSetColor(ofColor::white);
+			ofDrawBitmapString(smokeBombText, ofPoint(ofGetWindowWidth()/2 - smokeBombText.length(), 20));
+		}
 
 
 		//draw player triangle
@@ -430,6 +486,12 @@ void ofApp::keyPressed(int key) {
 		easy = false;
 		hard = false;
 
+	}
+	if (keymap['z']) {
+		if (gameTime - smokeTime > smokeDelay) {
+			smokeTime = gameTime;
+			smoke->start();
+		}
 	}
 }
 

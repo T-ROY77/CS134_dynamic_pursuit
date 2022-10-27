@@ -1,5 +1,5 @@
 #pragma once
-//  Kevin M. Smith - CS 134 SJSU
+// Troy Perez - CS134 SJSU
 
 #include "TransformObject.h"
 #include "ParticleSystem.h"
@@ -34,5 +34,11 @@ public:
 	float radius;
 	bool visible;
 	bool createdSys;
+	bool oneShot;
 	EmitterType type;
+	int groupSize;
+	void spawn(float time);
+	glm::vec3 pos;
+	ofColor color;
+
 };

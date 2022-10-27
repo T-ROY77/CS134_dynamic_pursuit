@@ -1,5 +1,5 @@
 #pragma once
-//  Kevin M. Smith - CS 134 SJSU
+// Troy Perez - CS134 SJSU
 
 #include "ofMain.h"
 #include "Particle.h"
@@ -8,8 +8,11 @@
 //  Pure Virtual Function Class - must be subclassed to create new forces.
 //
 class ParticleForce {
+protected:
 public:
-	virtual void updateForce(Particle *) = 0;
+	bool applyOnce = false;
+	bool applied = false;
+	virtual void updateForce(Particle*) = 0;
 };
 
 class ParticleSystem {
@@ -41,4 +44,11 @@ class TurbulenceForce : public ParticleForce {
 public:
 	TurbulenceForce(const ofVec3f & min, const ofVec3f &max);
 	void updateForce(Particle *);
+};
+
+class ImpulseRadialForce : public ParticleForce {
+	float magnitude;
+public:
+	ImpulseRadialForce(float magnitude);
+	void updateForce(Particle*);
 };
