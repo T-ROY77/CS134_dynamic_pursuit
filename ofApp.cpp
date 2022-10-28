@@ -3,13 +3,9 @@
 
 #include "ofxGui.h"
 
-//
-// agents slow down when near player
-// how to rotate
-// 
-// choppy movement
-//
-//
+
+//add sound and particle emitter on kill
+
 void TriangleShape::draw() {
 	ofFill();
 	ofPushMatrix();
@@ -29,23 +25,22 @@ void Player::draw() {
 //--------------------------------------------------------------
 
 void ofApp::shootGun() {
-	// Create initialize a new particle with values from sliders
-	//
+	gun->start(p.getPoint());
+}
 
+void ofApp::smokeBomb() {
+	//add a delay?
+	if (bsmokeBomb) {
+		bsmokeHide = true;
 
-	
-	//gun->setVelocity(p.heading());
-	//gun->start();
+		if(gameTime - smokeHideStart > smokeDelay) {
+			p.pos.y = ofRandom(ofGetWindowHeight());
+			p.pos.x = ofRandom(ofGetWindowWidth());
+			bsmokeHide = false;
+			bsmokeBomb = false;
+		}
+	}
 
-	
-	Particle particle;
-
-	particle.position = p.getPoint();
-	particle.velocity = p.heading();
-	particle.acceleration = p.heading() * 2;
-	particle.radius = 3;
-
-	particles.push_back(particle);
 }
 
 void ofApp::setupParameters() {
@@ -64,6 +59,8 @@ void ofApp::setupParameters() {
 	startTime = ofGetElapsedTimeMillis();
 
 	gameTime = 0;
+
+	smokeTime = -smokeCooldown;
 
 	if (easy) {
 		penergy = 15;
@@ -106,42 +103,76 @@ void ofApp::setup() {
 
 	gui.add(agentSize.setup("Agent size", 15, 5, 50));
 	gui.add(agentRate.setup("Agent spawn rate", 2, .5, 5));
-	gui.add(agentLife.setup("Agent lifespan", 3000, 0, 10000));
+	gui.add(agentLife.setup("Agent lifespan", 0, -1, 10000));
 	gui.add(agentSpeed.setup("Agent speed", 1, .5, 3));
 
-
-
 	gui.add(head.setup("Show heading vector", false));
-	gui.add(sprite.setup("Show sprites", false));
+	gui.add(sprite.setup("Show sprites", true));
 	guiHide = true;
 	gameOver = false;
 
 
-	background.load("space_photo.png");
+	background.load("floor.png");
 	background.resize(ofGetWindowWidth(), ofGetWindowHeight());
 
 
 	//sprite setup
-	p.image.load("ship.png");
-	p.image.resize(300, 300);
+	p.image.load("ninja.png");
+	p.image.resize(250, 250);
 
 	invaders = new Emitter(new SpriteSystem);
 
 	invaders->setPosition(glm::vec3(ofGetWindowWidth() / 2, 10, 0));
 	invaders->setChildSize(10, 10);
 	ofImage image;
-	image.load("agent.png");
-	image.resize(invaders->childHeight * 10, invaders->childHeight * 10);
+	image.load("demon.png");
+	image.resize(invaders->childHeight * 7.5, invaders->childHeight * 7.5);
 	invaders->setChildImage(image);
 	invaders->setRate(20);
 	invaders->setLifespan(1000);
 
 	gun = new ParticleEmitter(new ParticleSystem);
 	gun->setRate(1);
-	gun->setLifespan(1000);
-	gun->setParticleRadius(2);
+	gun->setLifespan(100);
+ 	gun->setParticleRadius(5);
+	gun->oneShot = true;
+	gun->groupSize = 1;
+	gun->setVelocity(p.heading());
+	gun->acceleration = p.heading() * 2;
+	ofImage image2;
+	image2.load("Star.png");
+	image2.resize(75, 75);
+	gun->setChildImage(image2);
 
-	particles.clear();
+
+	explosions = new ParticleEmitter(new ParticleSystem);
+	explosions->groupSize = 25;
+	explosions->lifespan = 1;
+
+	explosions->setVelocity(glm::vec3(0, 0, 0));
+	explosions->oneShot = true;
+	explosions->setEmitterType(RadialEmitter);
+	explosions->setParticleRadius(5);
+	explosions->radius = 0;
+	explosions->setRate(1);
+	explosions->pos = glm::vec3(200, 200, 0);
+	explosions->color = ofColor::darkRed;
+	radialForce = new ImpulseRadialForce(.2);
+
+	explosions->sys->addForce(radialForce);
+
+	smoke = new ParticleEmitter(new ParticleSystem);
+	smoke->setEmitterType(RadialEmitter);
+	smoke->setParticleRadius(1.5);
+	smoke->groupSize = 2000;
+	smoke->setLifespan(1);
+	smoke->oneShot = true;
+	smoke->setVelocity(glm::vec3(0, 0, 0));
+	smoke->setRate(1);
+	smoke->color = ofColor::white;
+	smokeRadialForce = new ImpulseRadialForce(.25);
+
+	smoke->sys->addForce(smokeRadialForce);
 
 	setupParameters();
 }
@@ -151,11 +182,21 @@ void ofApp::update() {
 	invaders->setRate(agentRate);
 	invaders->setLifespan(agentLife);
 	invaders->setSpeed(agentSpeed);
-
 	invaders->childHeight = agentSize;
 	invaders->childWidth = agentSize;
 
-	//gun->update();
+	invaders->update(p.pos);
+
+	smoke->update();
+	smokeBomb();
+
+	explosions->update();
+
+
+	//gun particles
+	gun->setVelocity(p.heading());
+	gun->acceleration = p.heading();
+	gun->update();
 	for (int i = 0; i < particles.size(); i++) {
 		particles[i].integrate();
 	}
@@ -167,9 +208,8 @@ void ofApp::update() {
 		invaders->haveChildImage = false;
 	}
 
-
-	invaders->update(p.pos);
-
+	
+	checkGunCollisions();
 	checkCollisions();
 
 
@@ -179,51 +219,51 @@ void ofApp::update() {
 		start = false;
 	}
 
-	if (keymap[OF_KEY_UP]) {
+	if (keymap['w']) {
 		float x = speed;
 
 		//check screen boundaries
 		//
 		if (p.getPoint().x > ofGetWindowWidth()) {
-			keymap[OF_KEY_UP] = false;
+			keymap['w'] = false;
 		}
 		if (p.getPoint().y > ofGetWindowHeight()) {
-			keymap[OF_KEY_UP] = false;
+			keymap['w'] = false;
 		}
 		if (p.getPoint().x < 0) {
-			keymap[OF_KEY_UP] = false;
+			keymap['w'] = false;
 		}
 		if (p.getPoint().y < 0) {
-			keymap[OF_KEY_UP] = false;
+			keymap['w'] = false;
 		}
 
-		if (keymap[OF_KEY_UP]) { p.pos += p.heading() * x; }
+		if (keymap['w']) { p.pos += p.heading() * x; }
 
 	}
 
-	if (keymap[OF_KEY_DOWN]) {
+	if (keymap['s']) {
 		float x = speed;
 
 		//check screen boundaries
 		//
 		if (p.getBackPoint().x > ofGetWindowWidth()) {
-			keymap[OF_KEY_DOWN] = false;
+			keymap['s'] = false;
 		}
 		if (p.getBackPoint().y > ofGetWindowHeight()) {
-			keymap[OF_KEY_DOWN] = false;
+			keymap['s'] = false;
 		}
 		if (p.getBackPoint().x < 0) {
-			keymap[OF_KEY_DOWN] = false;
+			keymap['s'] = false;
 		}
 		if (p.getBackPoint().y < 0) {
-			keymap[OF_KEY_DOWN] = false;
+			keymap['s'] = false;
 		}
 
-		if (keymap[OF_KEY_DOWN]) { p.pos -= p.heading() * x; }
+		if (keymap['s']) { p.pos -= p.heading() * x; }
 	}
 
-	if (keymap[OF_KEY_RIGHT]) { p.rotation += speed / 2;}
-	if (keymap[OF_KEY_LEFT]) {p.rotation -= speed / 2;}
+	if (keymap['d']) { p.rotation += speed / 2;}
+	if (keymap['a']) {p.rotation -= speed / 2;}
 
 	p.scalar = glm::vec3(size);
 
@@ -235,23 +275,49 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::checkCollisions() {
+	if (!bsmokeHide) {
+		// find the distance at which the two sprites (missles and invaders) will collide
+		// detect a collision when we are within that distance.
+		//
+		float collisionDist = 50 * size / 2 + invaders->childHeight / 2;
+
+		// Loop through all the missiles, then remove any invaders that are within
+		// "collisionDist" of the missiles.  the removeNear() function returns the
+		// number of missiles removed.
+		//
+		if (penergy > 0) {
+			int collisions = invaders->sys->removeNear(p.pos, collisionDist);
+			penergy = penergy - collisions;
+		}
+	}
+}
+
+//--------------------------------------------------------------
+void ofApp::checkGunCollisions() {
 
 	// find the distance at which the two sprites (missles and invaders) will collide
 	// detect a collision when we are within that distance.
 	//
-	float collisionDist = 50 * size / 2 + invaders->childHeight / 2;
+	float collisionDist = gun->particleRadius * 2  + invaders->childHeight;
 
 	// Loop through all the missiles, then remove any invaders that are within
 	// "collisionDist" of the missiles.  the removeNear() function returns the
 	// number of missiles removed.
 	//
-	if (penergy > 0) {
-		int collisions = invaders->sys->removeNear(p.pos, collisionDist);
-		penergy = penergy - collisions;
+
+	int collisions = 0;
+	for (int i = 0; i < gun->sys->particles.size(); i++) {
+		collisions = 0;
+		collisions += invaders->sys->removeNear(gun->sys->particles[i].position, collisionDist);
+		if (collisions > 0) {
+			gun->sys->particles[i].lifespan = 0;
+			explosions->start(gun->sys->particles[i].position);
+		}
+		if (penergy < 15) {
+			penergy = penergy + collisions;
+		}
 	}
 }
-
-
 
 //--------------------------------------------------------------
 void ofApp::draw() {
@@ -271,11 +337,11 @@ void ofApp::draw() {
 		string diffText;
 		diffText += "Difficulty: \n";
 		diffText += "\n";
-		diffText += "Press q for easy \n";
+		diffText += "Press 1 for easy \n";
 		diffText += "\n";
-		diffText += "Press w for medium \n";
+		diffText += "Press 2 for medium \n";
 		diffText += "\n";
-		diffText += "Press e for hard \n";
+		diffText += "Press 3 for hard \n";
 
 		ofSetColor(ofColor::white);
 		ofDrawBitmapString(diffText, ofPoint(10, 50));
@@ -316,18 +382,16 @@ void ofApp::draw() {
 		ofDrawBitmapString(timeText, ofPoint(ofGetWindowWidth() / 2 - 50, (ofGetWindowHeight() / 2) + 50));
 	}
 	if (start) {
+		ofSetBackgroundColor(ofColor::black);
 		ofSetColor(ofColor::white);
 		background.draw(0, 0);
-
-		//ofSetBackgroundColor(ofColor::black);
 
 		gameOver = false;
 
 		invaders->draw();
-
-
-		ofSetColor(ofColor::red);
-		//gun->draw();
+		explosions->draw();
+		smoke->draw();
+		gun->draw();
 
 		for (int i = 0; i < particles.size(); i++) {
 			particles[i].draw();
@@ -351,6 +415,12 @@ void ofApp::draw() {
 		ofSetColor(ofColor::white);
 		ofDrawBitmapString(timeText, ofPoint(ofGetWindowWidth() - 210, 40));
 
+		if (gameTime - smokeTime > smokeCooldown) {
+			string smokeBombText;
+			smokeBombText = "Smoke Bomb Ready";
+			ofSetColor(ofColor::white);
+			ofDrawBitmapString(smokeBombText, ofPoint(ofGetWindowWidth() / 2 - smokeBombText.length(), 20));
+		}
 
 		//draw player triangle
 		if (!sprite) {
@@ -381,28 +451,20 @@ void ofApp::draw() {
 
 		//draw sprite
 		if (sprite) {
-			ofSetColor(ofColor::white);
-			ofPushMatrix();
-			ofMultMatrix(p.getMatrix());
-			p.image.draw(0, 0);
-			p.image.setAnchorPoint(p.image.getWidth() / 2, p.image.getHeight() / 2);
-			ofPopMatrix();
+			if (!bsmokeHide) {
+				ofSetColor(ofColor::white);
+				ofPushMatrix();
+				ofMultMatrix(p.getMatrix());
+				p.image.draw(0, 0);
+				p.image.setAnchorPoint(p.image.getWidth() / 2, p.image.getHeight() / 2);
+				ofPopMatrix();
+			}
 		}
 	}
 }
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
 	keymap[key] = true;
-	
-	if (keymap[OF_KEY_RIGHT]) {
-		moveRt = true;
-	}
-	if (keymap[OF_KEY_UP]) {
-		moveUp = true;
-	}
-	if (keymap[OF_KEY_DOWN]) {
-		moveBack = true;
-	}
 	if (keymap['h']) {
 		guiHide = !guiHide;
 	}
@@ -416,20 +478,28 @@ void ofApp::keyPressed(int key) {
 			shootGun();
 		}
 	}
-	if (keymap['q']) {
+	if (keymap['1']) {
 		easy = true;
 		hard = false;
 
 	}
-	if (keymap['e']) {
+	if (keymap['3']) {
 		easy = false;
 		hard = true;
 
 	}
-	if (keymap['w']) {
+	if (keymap['2']) {
 		easy = false;
 		hard = false;
 
+	}
+	if (keymap['e']) {
+		if (gameTime - smokeTime > smokeCooldown) {
+			smokeTime = gameTime;
+			smokeHideStart = gameTime;
+			smoke->start(p.pos);
+			bsmokeBomb = true;
+		}
 	}
 }
 
