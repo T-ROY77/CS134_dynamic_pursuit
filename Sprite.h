@@ -29,9 +29,12 @@ public:
 	float age();
 	void setImage(ofImage);
 	float speed;    //   in pixels/sec
-	ofVec3f velocity; // in pixels/sec
-	ofVec3f acceleration; // in pixels/sec
-	ofVec3f forces; // in pixels/sec
+	glm::vec3 velocity;
+	glm::vec3 acceleration;
+	glm::vec3 forces;
+	float angularForce;
+	float angularVelocity;
+	float angularAcceleration;
 	float mass;
 	float damping;
 	ofImage image;
@@ -43,7 +46,7 @@ public:
 	glm::vec3 heading();
 	void moveSprite(glm::vec3 p);
 	glm::mat4 getMatrix();
-	void integrate();
+	void integrate(glm::vec3 p);
 
 
 };
@@ -58,5 +61,6 @@ public:
 	int removeNear(ofVec3f point, float dist);
 	void draw();
 	vector<Sprite> sprites;
+	vector<glm::vec3> spritePos;
 
 };
