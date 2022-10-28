@@ -20,6 +20,8 @@ Emitter::Emitter(SpriteSystem* spriteSys) {
 	haveChildImage = false;
 	haveImage = false;
 	velocity = ofVec3f(0, 0, 0);
+	acceleration = glm::vec3(0, 0, 0);
+
 	drawable = false;
 	width = 50;
 	height = 50;
@@ -59,19 +61,14 @@ void Emitter::update(glm::vec3 p) {
 		// spawn a new sprite
 		Sprite sprite;
 		if (haveChildImage) sprite.setImage(childImage);
-		sprite.velocity = velocity;
 		sprite.lifespan = lifespan;
 
 		//set random spawn point
 		sprite.setPosition(glm::vec3(ofRandom(ofGetWindowWidth() - 1), ofRandom(ofGetWindowHeight() - 1), 0));
 		sprite.rot = ofRandom(359);
-		//
-		//
-		sprite.velocity = p - trans;
-		sprite.acceleration = p - trans;
 		sprite.damping = .99;
-		//
-		//
+		//sprite.velocity = p - trans;
+		//sprite.acceleration = p - trans;
 		sprite.birthtime = time;
 		sprite.width = childWidth;
 		sprite.height = childHeight;
