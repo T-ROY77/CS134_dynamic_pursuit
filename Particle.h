@@ -8,7 +8,9 @@ class Particle {
 public:
 	Particle();
 
-	ofVec3f position;
+	glm::vec3 position;
+	float rot;
+	glm::vec3 scale;
 	ofVec3f velocity;
 	ofVec3f acceleration;
 	ofVec3f forces;
@@ -20,7 +22,11 @@ public:
 	void    integrate();
 	void    draw();
 	float   age();        // sec
+	glm::mat4 getMatrix();
 	ofColor color;
+	ofImage image;
+	bool haveImage = false;
+	bool done = false;
 };
 
 
