@@ -32,6 +32,8 @@ Sprite::Sprite() {
 	imageHeight = 20;
 	mass = 1;
 
+
+
 }
 
 // Return a sprite's age in milliseconds
@@ -51,9 +53,9 @@ void Sprite::setImage(ofImage img) {
 
 glm::vec3 Sprite::heading() {
 	glm::vec3 o = glm::vec3(0, -1, 0);
-	o = glm::rotate(o, glm::radians(rot), glm::vec3(0, 0, 1));
-	glm::normalize(o);
-	return o;
+	glm::mat4 mrot = glm::rotate(glm::mat4(1), glm::radians(rot), glm::vec3(0, 0, 1));
+	glm::vec3 h = mrot * glm::vec4(o,1);
+	return glm::normalize(h);
 }
 
 void Sprite::moveSprite(glm::vec3 p) {
@@ -83,32 +85,56 @@ void Sprite::moveSprite(glm::vec3 p) {
 	
 }
 
-void Sprite::integrate() {
+//move sprite with forces
+//
+void Sprite::integrate(glm::vec3 p) {
 
+	float frate = ofGetFrameRate();
+	float dt = 1.0 / frate;
 
-	// interval for this step
-	//
-	float dt = 1.0 / ofGetFrameRate();
+	velocity += glm::normalize(p - trans);
 
-	//rotational attraction force
-	//rot += rotation force;
-
-	// update position based on velocity
-	//
-	//position += (velocity * dt);
-	trans += (velocity * dt);
-
-
-	
-	ofVec3f accel = acceleration;    // start with any acceleration already on the particle
-	accel += (forces * (1.0 / mass));
+	trans += (velocity * dt * speed);
+	glm::vec3 accel = acceleration;
+	accel += (forces * 1 / mass);
 	velocity += accel * dt;
-	//velocity += accel;
 	velocity *= damping;
 
+	//calculate rotation velocity
+	if (!haveImage) {
+		ofVec3f headed = heading();
+		ofVec3f rotVector = p - trans;
+		ofVec3f v1 = rotVector.normalize();
+		ofVec3f v2 = headed.normalize();
+
+		float dot = v2.dot(v1);
+		float theta = acos(dot);
+
+
+		if (theta >= .1) {
+			theta = glm::degrees(theta);
+			angularVelocity = -theta;
+		}
+		else {
+			if (theta > -360) {
+				theta = glm::degrees(theta);
+				angularVelocity = theta;
+			}
+		}
+
+		rot += (angularVelocity * dt);
+		float a = angularAcceleration;
+		a += angularForce * 1 / mass;
+		angularVelocity += a * dt;
+		angularVelocity *= damping;
+	}
+	if (haveImage) {
+		rot = 0;
+	}
 	// clear forces on particle (they get re-added each step)
 	//
-	forces.set(0, 0, 0);
+	forces = glm::vec3(0);
+
 }
 
 
@@ -176,6 +202,7 @@ int SpriteSystem::removeNear(ofVec3f point, float dist) {
 	while (s != sprites.end()) {
 		ofVec3f v = s->trans - point;
 		if (v.length() < dist) {
+			spritePos.push_back(s->trans);
 			tmp = sprites.erase(s);
 			count++;
 			s = tmp;
@@ -212,7 +239,7 @@ void SpriteSystem::update(glm::vec3 p) {
 	//  Move sprite
 	for (int i = 0; i < sprites.size(); i++) {
 		//sprites[i].moveSprite(p);
-		sprites[i].integrate();
+		sprites[i].integrate(p);
 	}
 }
 
