@@ -30,6 +30,7 @@ public:
 	SpriteSystem* sys;
 	float rate;
 	ofVec3f velocity;
+	glm::vec3 acceleration;
 	float lifespan;
 	bool started;
 	float lastSpawned;
