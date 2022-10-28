@@ -4,7 +4,7 @@
 #include "ofxGui.h"
 
 
-//add sound and particle emitter on kill
+//add sound
 
 void TriangleShape::draw() {
 	ofFill();
