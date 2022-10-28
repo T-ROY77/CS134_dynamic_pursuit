@@ -37,6 +37,8 @@ void ParticleEmitter::init() {
 	particleRadius = .1;
 	visible = true;
 	type = DirectionalEmitter;
+	groupSize = 1;
+	pos = glm::vec3(0);
 }
 
 
@@ -57,7 +59,8 @@ void ParticleEmitter::draw() {
 	}
 	sys->draw();  
 }
-void ParticleEmitter::start() {
+void ParticleEmitter::start(glm::vec3 p) {
+	pos = p;
 	started = true;
 	lastSpawned = ofGetElapsedTimeMillis();
 }
@@ -66,41 +69,63 @@ void ParticleEmitter::stop() {
 	started = false;
 }
 void ParticleEmitter::update() {
-	if (!started) return;
 
 	float time = ofGetElapsedTimeMillis();
 
-	if ((time - lastSpawned) > (1000.0 / rate)) {
-
-		// spawn a new particle
-		//
-		Particle particle;
-
-		// set initial velocity and position
-		// based on emitter type
-		//
-		switch (type) {
-		case RadialEmitter:
-	//		break;
-		case SphereEmitter:
-	//		break;
-		case DirectionalEmitter:
-			particle.velocity = velocity;
-			particle.position.set(position);
-			break;
+	if (oneShot && started) {
+		for (int i = 0; i < groupSize; i++) {
+			spawn(time);
 		}
-
-		// other particle attributes
-		//
-		particle.lifespan = lifespan;
-		particle.birthtime = time;
-		particle.radius = particleRadius;
-
-		// add to system
-		//
-		sys->add(particle);
+		lastSpawned = time;
+		stop();
+	}
+	else if ((time - lastSpawned) > (1000.0 / rate) && started) {
+		for (int i = 0; i < groupSize; i++) {
+			spawn(time);
+		}
 		lastSpawned = time;
 	}
 	sys->update();
+}
+
+void ParticleEmitter::spawn(float time) {
+	Particle particle;
+
+	// set initial velocity and position
+	// based on emitter type
+	//
+	switch (type) {
+	case RadialEmitter:
+	{
+		ofVec3f dir = ofVec3f(ofRandom(-1, 1), ofRandom(-1, 1), ofRandom(-1, 1));
+		float speed = velocity.length();
+		particle.velocity = dir.getNormalized() * speed;
+		particle.position = pos;
+	}
+	break;
+	case SphereEmitter:
+		break;
+	case DirectionalEmitter:
+		particle.velocity = velocity;
+		particle.acceleration = acceleration;
+		particle.position = pos;
+		break;
+	}
+
+	// other particle attributes
+	//
+	particle.lifespan = lifespan;
+	particle.birthtime = time;
+	particle.radius = particleRadius;
+	particle.color = color;
+
+	if (haveChildImage) {
+		particle.image = childImage;
+		particle.haveImage = true;
+	}
+
+	// add to system
+	//
+	sys->add(particle);
 }
 
