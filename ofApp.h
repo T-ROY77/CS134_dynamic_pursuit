@@ -105,9 +105,10 @@ public:
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
 	void checkCollisions();
-	void checkTriangleCollisions();
+	void checkGunCollisions();
 	void setupParameters();
 	void shootGun();
+	void smokeBomb();
 
 	Player p;
 	// state variables
@@ -121,14 +122,18 @@ public:
 	bool moveBack = false;
 	bool start = false;
 	bool gameOver = false;
+	bool bsmokeHide = false;
+	bool bsmokeBomb = false;
 
 	bool easy = false;
 	bool hard = false;
 
-	//int gameTime;
 	float gameTime;
-
 	float startTime;
+	float smokeTime;
+	float smokeCooldown = 5;
+	float smokeDelay = .5;
+	float smokeHideStart;
 
 	float length = 175;
 	glm::vec3 mouseLast;
@@ -152,9 +157,17 @@ public:
 	ofxToggle sprite;
 	ofxToggle head;
 
+	ofxVec3Slider agentAcceleration;
+
+	
 	Emitter* invaders;
 
 	ParticleEmitter* gun;
+	ParticleEmitter* explosions;
+	ParticleEmitter* smoke;
+
+	ImpulseRadialForce* radialForce;
+	ImpulseRadialForce* smokeRadialForce;
 
 	vector<Particle> particles;
 
