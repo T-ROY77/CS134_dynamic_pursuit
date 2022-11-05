@@ -1,13 +1,14 @@
 #pragma once
-//  Kevin M. Smith - CS 134 SJSU
 
 #include "TransformObject.h"
 #include "ParticleSystem.h"
 
+// Troy Perez - CS134 SJSU
+
+
 typedef enum { DirectionalEmitter, RadialEmitter, SphereEmitter } EmitterType;
 
-//  General purpose Emitter class for emitting sprites
-//  This works similar to a Particle emitter
+//  General purpose Emitter class for emitting particles
 //
 class ParticleEmitter : public TransformObject {
 public:
@@ -31,17 +32,17 @@ public:
 	ofVec3f velocity;
 	glm::vec3 acceleration;
 	float lifespan;     // sec
-	bool started;
 	float lastSpawned;  // ms
 	float particleRadius;
 	float radius;
+	bool started;
 	bool visible;
 	bool createdSys;
 	bool oneShot;
+	bool haveChildImage;
 	EmitterType type;
 	int groupSize;
 	glm::vec3 pos;
 	ofColor color;
-	bool haveChildImage = false;
 	ofImage childImage;
 };
