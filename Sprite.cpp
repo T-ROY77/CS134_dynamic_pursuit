@@ -1,6 +1,7 @@
+#pragma once
+
 #include "Sprite.h"
 
-//
 // Troy Perez - CS134 SJSU
 
 BaseObject::BaseObject() {
@@ -51,6 +52,8 @@ void Sprite::setImage(ofImage img) {
 	imageHeight = image.getHeight();
 }
 
+//return the sprites heading vector
+//
 glm::vec3 Sprite::heading() {
 	glm::vec3 o = glm::vec3(0, -1, 0);
 	glm::mat4 mrot = glm::rotate(glm::mat4(1), glm::radians(rot), glm::vec3(0, 0, 1));
@@ -58,11 +61,11 @@ glm::vec3 Sprite::heading() {
 	return glm::normalize(h);
 }
 
+//move the sprite along its heading vector
+//
 void Sprite::moveSprite(glm::vec3 p) {
 	glm::vec3 head = heading();
 	trans += head * speed;
-
-
 
 	//rotate agent to face the player
 	ofVec3f headed = heading();
@@ -92,9 +95,11 @@ void Sprite::integrate(glm::vec3 p) {
 	float frate = ofGetFrameRate();
 	float dt = 1.0 / frate;
 
+	//move the sprite
 	velocity += glm::normalize(p - trans);
-
 	trans += (velocity * dt * speed);
+
+	//update velocity and acceleration
 	glm::vec3 accel = acceleration;
 	accel += (forces * 1 / mass);
 	velocity += accel * dt;
@@ -110,7 +115,7 @@ void Sprite::integrate(glm::vec3 p) {
 		float dot = v2.dot(v1);
 		float theta = acos(dot);
 
-
+		//keep sprites from spinning in circles
 		if (theta >= .1) {
 			theta = glm::degrees(theta);
 			angularVelocity = -theta;
@@ -122,19 +127,20 @@ void Sprite::integrate(glm::vec3 p) {
 			}
 		}
 
+		//update rotation
 		rot += (angularVelocity * dt);
 		float a = angularAcceleration;
 		a += angularForce * 1 / mass;
 		angularVelocity += a * dt;
 		angularVelocity *= damping;
 	}
+	//sprites with images have no rotation
 	if (haveImage) {
 		rot = 0;
 	}
-	// clear forces on particle (they get re-added each step)
-	//
-	forces = glm::vec3(0);
 
+	// clear forces on particle
+	forces = glm::vec3(0);
 }
 
 
@@ -158,7 +164,8 @@ void Sprite::draw() {
 		ofSetColor(ofColor::white);
 		ofPushMatrix();
 		ofMultMatrix(getMatrix());
-		image.draw(-imageWidth / 2.0, -imageHeight / 2.0);
+		image.resize(height * 3, height * 3);
+		image.draw(-image.getWidth(), -image.getHeight());
 		ofPopMatrix();
 
 	}
@@ -192,7 +199,8 @@ void SpriteSystem::remove(int i) {
 
 
 
-// remove all sprites within a given dist of point, return number removed
+// remove all sprites within a given dist of point
+// return number removed
 //
 int SpriteSystem::removeNear(ofVec3f point, float dist) {
 	vector<Sprite>::iterator s = sprites.begin();
@@ -214,8 +222,8 @@ int SpriteSystem::removeNear(ofVec3f point, float dist) {
 
 
 //  Update the SpriteSystem by checking which sprites have exceeded their
-//  lifespan (and deleting).  Also the sprite is moved to it's next
-//  location based on velocity and direction.
+//  lifespan (and deleting). 
+//  Integrate the sprites
 //
 void SpriteSystem::update(glm::vec3 p) {
 
