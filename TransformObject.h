@@ -1,8 +1,8 @@
 #pragma once
 #include "ofMain.h"
 
-//  Kevin M. Smith - CS 134 SJSU
-//
+// Troy Perez - CS134 SJSU
+
 
 //  Base class for any object that needs a transform.
 //
