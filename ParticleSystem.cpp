@@ -1,20 +1,30 @@
-
-// Kevin M.Smith - CS 134 SJSU
+#pragma once
 
 #include "ParticleSystem.h"
 
+// Troy Perez - CS134 SJSU
+
+//add a particle to the system
+//
 void ParticleSystem::add(const Particle &p) {
 	particles.push_back(p);
 }
 
+//add a force to the system
+//
 void ParticleSystem::addForce(ParticleForce *f) {
 	forces.push_back(f);
 }
 
+//remove a particle from the system
+//
 void ParticleSystem::remove(int i) {
 	particles.erase(particles.begin() + i);
 }
 
+//update the particle system
+//update the particles
+//
 void ParticleSystem::update() {
 	// check if empty and just return
 	if (particles.size() == 0) return;
@@ -49,16 +59,13 @@ void ParticleSystem::update() {
 		if (forces[i]->applyOnce)
 			forces[i]->applied = true;
 	}
+
 	// integrate all the particles in the store
 	//
 	for (int i = 0; i < particles.size(); i++)
 		particles[i].integrate();
 
 }
-
-// remove all particlies within "dist" of point (not implemented as yet)
-//
-//int ParticleSystem::removeNear(const ofVec3f & point, float dist) { return 0; }
 
 //  draw the particle cloud
 //
@@ -67,7 +74,6 @@ void ParticleSystem::draw() {
 		particles[i].draw();
 	}
 }
-
 
 // Gravity Force Field 
 //
@@ -80,9 +86,6 @@ void GravityForce::setGravityForce(const ofVec3f& g) {
 }
 
 void GravityForce::updateForce(Particle * particle) {
-	//
-	// f = mg
-	//
 	particle->forces += gravity * particle->mass;
 }
 
@@ -108,7 +111,6 @@ void TurbulenceForce::updateForce(Particle * particle) {
 //
 ImpulseRadialForce::ImpulseRadialForce(float magnitude) {
 	this->magnitude = magnitude;
-	//applyOnce = true;
 }
 
 void ImpulseRadialForce::updateForce(Particle* particle) {
