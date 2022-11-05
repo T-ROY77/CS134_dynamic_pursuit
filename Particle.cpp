@@ -1,5 +1,8 @@
+#pragma once
+
 #include "Particle.h"
 
+// Troy Perez - CS134 SJSU
 
 Particle::Particle() {
 
@@ -27,48 +30,31 @@ void Particle::draw() {
 		}
 		else {
 			ofSetColor(ofColor::white);
-			//position = glm::rotate(position, glm::radians(rot),glm::vec3(0, 0, 1));
 			image.draw(position);
-
-			/*
-			ofPushMatrix();
-			ofMultMatrix(getMatrix());
-			image.draw(-image.getWidth() / 2.0, -image.getHeight() / 2.0);
-			ofPopMatrix;
-			*/
 		}
 	}
-
 }
 
-// write your own integrator here.. (hint: it's only 3 lines of code)
-//
+//integrate the particle based on forces and velocity
 void Particle::integrate() {
 	if (!done) {
-
-		// interval for this step
-		//
 		float dt = 1.0 / ofGetFrameRate();
 
 		// update position based on velocity
-		//
-		//position += (velocity * dt);
 		position += (velocity);
 
 
 		// update acceleration with accumulated paritcles forces
-		// remember :  (f = ma) OR (a = 1/m * f)
 		//
 		ofVec3f accel = acceleration;    // start with any acceleration already on the particle
 		accel += (forces * (1.0 / mass));
-		//velocity += accel * dt;
 		velocity += accel;
 
-		// add a little damping for good measure
+		// add a little damping
 		//
 		velocity *= damping;
 
-		// clear forces on particle (they get re-added each step)
+		// clear forces on particle
 		//
 		forces.set(0, 0, 0);
 	}
