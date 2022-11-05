@@ -1,10 +1,7 @@
 #pragma once
-//----------------------------------------------------------------------------------
-//
-// Basic Sprite Class
-//
-//
-//  Kevin M. Smith - CS 134 SJSU
+
+// Troy Perez - CS134 SJSU
+
 
 #include "ofMain.h"
 
