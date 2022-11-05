@@ -4,7 +4,8 @@
 // Basic Sprite Emitter Class
 //
 //
-//  Kevin M. Smith - CS 134 SJSU
+// Troy Perez - CS134 SJSU
+
 
 #include "Sprite.h"
 
