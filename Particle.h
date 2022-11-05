@@ -2,6 +2,9 @@
 
 #include "ofMain.h"
 
+// Troy Perez - CS134 SJSU
+
+
 class ParticleForceField;
 
 class Particle {
