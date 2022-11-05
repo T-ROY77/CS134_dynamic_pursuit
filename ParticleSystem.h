@@ -1,8 +1,9 @@
 #pragma once
-//  Kevin M. Smith - CS 134 SJSU
 
 #include "ofMain.h"
 #include "Particle.h"
+
+// Troy Perez - CS134 SJSU
 
 
 //  Pure Virtual Function Class - must be subclassed to create new forces.
