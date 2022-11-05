@@ -1,7 +1,6 @@
 #pragma once
 #include "ofMain.h"
 #include "Sprite.h"
-
 #include "ofxGui.h"
 #include "Particle.h"
 #include "ParticleEmitter.h"
@@ -124,9 +123,10 @@ public:
 	bool gameOver = false;
 	bool bsmokeHide = false;
 	bool bsmokeBomb = false;
-
 	bool easy = false;
 	bool hard = false;
+	bool agentDeath = false;
+	bool playerHit = false;
 
 	float gameTime;
 	float startTime;
@@ -134,6 +134,8 @@ public:
 	float smokeCooldown = 5;
 	float smokeDelay = .5;
 	float smokeHideStart;
+	float gunCooldown = .2;
+	float gunTimeStart;
 
 	float length = 175;
 	glm::vec3 mouseLast;
@@ -156,6 +158,7 @@ public:
 	ofxFloatSlider agentLife;
 	ofxToggle sprite;
 	ofxToggle head;
+	ofxToggle invincible;
 
 	ofxVec3Slider agentAcceleration;
 
@@ -169,8 +172,13 @@ public:
 	ImpulseRadialForce* radialForce;
 	ImpulseRadialForce* smokeRadialForce;
 
-	vector<Particle> particles;
 
 	ofImage background;
+	ofImage smokeBombSprite;
+
+	ofSoundPlayer explosionSound;
+	ofSoundPlayer smokeSound;
+	ofSoundPlayer hitSound;
+
 
 };
