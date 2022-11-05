@@ -1,10 +1,9 @@
-
-
+#pragma once
 
 #include "ofMain.h"
 #include "Emitter.h"
 
-
+// Troy Perez - CS134 SJSU
 
 //  Create a new Emitter - needs a SpriteSystem
 //
@@ -66,9 +65,8 @@ void Emitter::update(glm::vec3 p) {
 		//set random spawn point
 		sprite.setPosition(glm::vec3(ofRandom(ofGetWindowWidth() - 1), ofRandom(ofGetWindowHeight() - 1), 0));
 		sprite.rot = ofRandom(359);
+
 		sprite.damping = .99;
-		//sprite.velocity = p - trans;
-		//sprite.acceleration = p - trans;
 		sprite.birthtime = time;
 		sprite.width = childWidth;
 		sprite.height = childHeight;
@@ -90,7 +88,6 @@ void Emitter::start() {
 void Emitter::stop() {
 	started = false;
 }
-
 
 void Emitter::setLifespan(float life) {
 	lifespan = life;
