@@ -1,7 +1,8 @@
-
-//  Kevin M. Smith - CS 134 SJSU
+#pragma once
 
 #include "ParticleEmitter.h"
+
+// Troy Perez - CS134 SJSU
 
 ParticleEmitter::ParticleEmitter() {
 	sys = new ParticleSystem();
@@ -42,7 +43,9 @@ void ParticleEmitter::init() {
 }
 
 
-
+//draw the particle emitter
+//draw the particle system
+//
 void ParticleEmitter::draw() {
 	if (visible) {
 		switch (type) {
@@ -59,15 +62,24 @@ void ParticleEmitter::draw() {
 	}
 	sys->draw();  
 }
+
+//start the particle emitter
+//
 void ParticleEmitter::start(glm::vec3 p) {
 	pos = p;
 	started = true;
 	lastSpawned = ofGetElapsedTimeMillis();
 }
 
+//stop the particle emitter
+//
 void ParticleEmitter::stop() {
 	started = false;
 }
+
+//update the particle emitter
+//update the particle system
+//
 void ParticleEmitter::update() {
 
 	float time = ofGetElapsedTimeMillis();
@@ -88,6 +100,8 @@ void ParticleEmitter::update() {
 	sys->update();
 }
 
+//spawn a new particle and add to system
+//
 void ParticleEmitter::spawn(float time) {
 	Particle particle;
 
@@ -119,6 +133,8 @@ void ParticleEmitter::spawn(float time) {
 	particle.radius = particleRadius;
 	particle.color = color;
 
+	//particle.color = ofColor(ofRandom(254), ofRandom(254), ofRandom(254));
+
 	if (haveChildImage) {
 		particle.image = childImage;
 		particle.haveImage = true;
@@ -128,4 +144,3 @@ void ParticleEmitter::spawn(float time) {
 	//
 	sys->add(particle);
 }
-
