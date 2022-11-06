@@ -6,9 +6,6 @@
 
 // Troy Perez - CS134 SJSU
 
-
-//set difficulty levels
-
 //--------------------------------------------------------------
 void TriangleShape::draw() {
 	ofFill();
@@ -33,7 +30,7 @@ void Player::draw() {
 void ofApp::setupParameters() {
 	p.pos = glm::vec3(ofGetWindowWidth() / 2.0 - 100, ofGetWindowHeight() / 2.0 - 100,
 		0);
-	p.rotation = 0;
+	p.rotation = 180;
 
 	if (start) {
 		invaders->start();
@@ -46,21 +43,27 @@ void ofApp::setupParameters() {
 	if (easy) {
 		penergy = 15;
 		agentRate = 5;
-		agentLife = 2000;
-		agentSpeed = 1;
+		agentLife = 7000;
+		agentSpeed = 3;
+		smokeCooldown = 5;
+		maxEnergy = 10;
 	}
 	else if (hard) {
 		penergy = 5;
-		agentRate = 10;
-		agentLife = 7000;
-		agentSpeed = 3;
+		agentRate = 9;
+		agentLife = 15000;
+		agentSpeed = 5;
+		smokeCooldown = 9;
+		maxEnergy = 5;
 	}
 	else
 	{
-		penergy = 10;
+		penergy = 7;
 		agentRate = 7;
 		agentLife = 10000;
-		agentSpeed = 3;
+		agentSpeed = 4;
+		smokeCooldown = 7;
+		maxEnergy = 7;
 	}
 }
 
@@ -69,6 +72,7 @@ void ofApp::setupParameters() {
 //
 void ofApp::setup() {
 	ofSetVerticalSync(true);
+	//ofSetFullscreen(true);
 
 	//setup Player
 	p = Player(glm::vec3(-50, 50, 0), glm::vec3(50, 50, 0), glm::vec3(0,
@@ -94,7 +98,7 @@ void ofApp::setup() {
 
 	guiHide = true;
 	gameOver = false;
-	gui.setPosition(20, 0);
+	gui.setPosition(20, 100);
 
 	//setup background image
 	background.load("floor.png");
@@ -124,7 +128,7 @@ void ofApp::setup() {
 	gun->oneShot = true;
 	gun->groupSize = 1;
 	gun->setVelocity(p.heading());
-	gun->acceleration = p.heading() * 2;
+	gun->acceleration = p.heading();
 	ofImage image2;
 	image2.load("Star.png");
 	image2.resize(75, 75);
@@ -378,6 +382,7 @@ void ofApp::draw() {
 			}
 		}
 
+
 		ofSetColor(ofColor::red);
 
 		//game title
@@ -385,21 +390,25 @@ void ofApp::draw() {
 		titleText += "Fighting Demons";
 		ofDrawBitmapString(titleText, ofPoint(ofGetWindowWidth() / 2 - titleText.length(), 30));
 
+
 		//how to start
 		string startText;
 		startText += "Press z to start game ";
-		ofDrawBitmapString(startText, ofPoint(20, 200));
+		ofDrawBitmapString(startText, ofPoint(70, 210));
 
 		//difficulty setting
 		string diffText;
-		diffText += "Difficulty: \n";
+		diffText += "Difficulty:";
 		diffText += "\n";
-		diffText += "Press 1 for easy \n";
 		diffText += "\n";
-		diffText += "Press 2 for normal \n";
+		diffText += "Press 1 for easy";
 		diffText += "\n";
-		diffText += "Press 3 for hard \n";
-		ofDrawBitmapString(diffText, ofPoint(20, 80));
+		diffText += "\n";
+		diffText += "Press 2 for normal";
+		diffText += "\n";
+		diffText += "\n";
+		diffText += "Press 3 for hard";
+		ofDrawBitmapString(diffText, ofPoint(70, 100));
 
 		string modeText;
 		if (easy) {
@@ -411,13 +420,29 @@ void ofApp::draw() {
 		else {
 			modeText += "Normal";
 		}
-		ofDrawBitmapString(modeText, ofPoint(110, 80));
+		ofDrawBitmapString(modeText, ofPoint(160, 100));
+
+		string controlText;
+		controlText += "Use WASD to move";
+		controlText += "\n";
+		controlText += "\n";
+		controlText += "Press space to shoot ninja stars";
+		controlText += "\n";
+		controlText += "\n";
+		controlText += "Press e to use smoke bomb";
+		controlText += "\n";
+		controlText += "\n";
+		controlText += "F1 to toggle fullscreen";
+		ofDrawBitmapString(controlText, ofPoint(ofGetWindowWidth() - 320, 100));
 
 		//if smoke bomb is not on cooldown, draw sprite
 		if (gameTime - smokeTime > smokeCooldown) {
 			ofSetColor(ofColor::white);
 			smokeBombSprite.draw(glm::vec3(50, -25, 0));
 		}
+
+		
+
 	}
 	//game is started
 	if (start) {
@@ -452,7 +477,7 @@ void ofApp::draw() {
 		gameTimeText.resize(4);
 		timeText += "Elasped time: " + gameTimeText + " seconds";
 		ofSetColor(ofColor::white);
-		ofDrawBitmapString(timeText, ofPoint(ofGetWindowWidth() - 210, 40));
+		ofDrawBitmapString(timeText, ofPoint(ofGetWindowWidth() - 210, 35));
 
 		//if smoke bomb is not on cooldown, draw sprite
 		if (gameTime - smokeTime > smokeCooldown) {
@@ -548,17 +573,20 @@ void ofApp::draw() {
 		//start new game
 		string startText;
 		startText += "Press z to start new game ";
-		ofDrawBitmapString(startText, ofPoint(20, 200));
+		ofDrawBitmapString(startText, ofPoint(20, 210));
 
 		//difficulty setting
 		string diffText;
-		diffText += "Difficulty: \n";
+		diffText += "Difficulty:";
 		diffText += "\n";
-		diffText += "Press 1 for easy \n";
 		diffText += "\n";
-		diffText += "Press 2 for normal \n";
+		diffText += "Press 1 for easy";
 		diffText += "\n";
-		diffText += "Press 3 for hard \n";
+		diffText += "\n";
+		diffText += "Press 2 for normal";
+		diffText += "\n";
+		diffText += "\n";
+		diffText += "Press 3 for hard";
 		ofDrawBitmapString(diffText, ofPoint(20, 80));
 
 		string modeText;
@@ -572,6 +600,11 @@ void ofApp::draw() {
 			modeText += "Normal";
 		}
 		ofDrawBitmapString(modeText, ofPoint(110, 80));
+
+		string controlText;
+		controlText += "F1 to toggle fullscreen";
+		ofDrawBitmapString(controlText, ofPoint(ofGetWindowWidth() - 320, 80));
+
 	}
 }
 //--------------------------------------------------------------
@@ -623,6 +656,10 @@ void ofApp::keyPressed(int key) {
 				smoke->start(p.pos);
 			}
 		}
+	}
+	//toggle fullscreen
+	if (keymap[OF_KEY_F1]) {
+		ofToggleFullscreen();
 	}
 }
 
@@ -706,7 +743,7 @@ void ofApp::checkGunCollisions() {
 	// find the distance at which the two sprites (missles and agents) will collide
 	// detect a collision when we are within that distance.
 	//
-	float collisionDist = gun->particleRadius * 2 + invaders->childHeight;
+	float collisionDist = gun->particleRadius + invaders->childImage.getHeight() * 1.5;
 
 	// Loop through all the missiles, then remove any invaders that are within
 	// "collisionDist" of the missiles.  the removeNear() function returns the
@@ -717,16 +754,18 @@ void ofApp::checkGunCollisions() {
 		collisions = 0;
 		collisions += invaders->sys->removeNear(gun->sys->particles[i].position, collisionDist);
 		if (collisions > 0) {
-			//remove the gun particle
-			gun->sys->particles[i].lifespan = 0;
 			//start explosion particle emitter
 			explosions->start(gun->sys->particles[i].position);
+			//remove the gun particle
+			gun->sys->particles[i].lifespan = 0;
+			
 			//bool to play death sound
 			agentDeath = true;
 		}
 		//increase player energy
-		if (penergy < 15) {
-			penergy = penergy + collisions;
+		penergy = penergy + collisions;
+		if (penergy > maxEnergy) {
+			penergy = maxEnergy;
 		}
 	}
 }

@@ -110,6 +110,7 @@ public:
 	void smokeBomb();
 
 	Player p;
+
 	// state variables
 	//
 	bool bInDrag = false;
@@ -128,6 +129,7 @@ public:
 	bool agentDeath = false;
 	bool playerHit = false;
 
+	//time variables
 	float gameTime;
 	float startTime;
 	float smokeTime;
@@ -141,6 +143,7 @@ public:
 	glm::vec3 mouseLast;
 
 	int energy;
+	int maxEnergy;
 
 	//KeyMap variables
 	//
@@ -159,26 +162,25 @@ public:
 	ofxToggle sprite;
 	ofxToggle head;
 	ofxToggle invincible;
-
 	ofxVec3Slider agentAcceleration;
 
-	
+	//emitters
 	Emitter* invaders;
 
 	ParticleEmitter* gun;
 	ParticleEmitter* explosions;
 	ParticleEmitter* smoke;
 
+	//agent forces
 	ImpulseRadialForce* radialForce;
 	ImpulseRadialForce* smokeRadialForce;
 
-
+	//images
 	ofImage background;
 	ofImage smokeBombSprite;
 
+	//sounds
 	ofSoundPlayer explosionSound;
 	ofSoundPlayer smokeSound;
 	ofSoundPlayer hitSound;
-
-
 };
