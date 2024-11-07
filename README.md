@@ -10,7 +10,7 @@ Files should be placed in openframeworks/apps folder
 You will need to use the projectGenerator.exe to create the project.  
 To do this for the first time:  
 -click "import" button  
--navigate to base folder named "Pursuit_Game"  
+-navigate to base folder named "Dynamic_Pursuit"  
 -click "update"  
 
 # Build and Run  
