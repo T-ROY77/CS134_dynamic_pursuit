@@ -18,3 +18,5 @@ To do this for the first time:
 You may need to retarget the project to the current version of openframeworks  
 You also may need to change the compiler from win32 to x64 depending on your system  
 After building project, running main will start the game  
+
+![screenshot of dynamic pursuit game](/bin/data/screenshot.png)
